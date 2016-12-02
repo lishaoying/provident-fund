@@ -1,0 +1,26 @@
+#公积金查询模块
+ |-learn
+   |-css
+     |-css.css
+   |-images
+     |-radio.png
+   |-js
+     |-jQuery1.8.3.js
+     |-js.js
+ |-login.html
+#文档规范
+ 1,页面采用动态计算html的FontSize
+ 2,根据UI效果图以iphone6计算rem
+ 3,css命名带上gsx前缀
+ 4,在js.js里面我用了一个全局变量timer作为停止计时器,有可能造成冲突
+ 5,后端需要在地址栏上传4个参数:type,appName,city,id,url
+    type:  gjj,  taobao,  jingdong,  contactlist,  zxreport,
+    appName:  genshuixue
+    city:  bj , ty
+    id:  id参数取申请数据表的id（不是跟谁学的订单号）
+    url:  获取公积金查询成功后的跳转地址
+ 6,低版本安卓UC浏览器可能会存在样式错乱问题, 待解决
+ 7,用到的开发库JQ
+
+
+

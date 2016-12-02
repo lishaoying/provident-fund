@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0,user-scalable=no" name="viewport" id="viewport" />
+    <script type="text/javascript" src="js/jQuery1.8.3.js"></script>
+    <link type="text/css" rel="stylesheet" href="css/css.css">
+    <title>公积金查询</title>
+</head>
+<body>
+    <script type="text/javascript" src="js/js.js"></script>
+    <div class="gsx">
+        <header class="gsx-head">跟谁学分期</header>
+        <div class="gsx-tab" id="tab">
+            <a href="javascript:;" class="gsx-tab-a gsx-tab-on" data-lb="5">联名卡号</a>
+            <a href="javascript:;" class="gsx-tab-a" data-lb="1">身份证号</a>
+        </div>
+
+        <form action="" method="post" id="form">
+            <div class="gsx-main">
+                <ul class="gsx-ul" id="tabSwitch">
+                    <li id="card" class="gsx-pl">
+                    </li>
+                    <li id="id" class="gsx-pl">
+                    </li>
+                </ul>
+            </div>
+
+            <div class="mt05973">
+                <label class="gsx-ig" data-check="Selected" id="gsx-ig"><span id="radio"></span></label>
+                <label class="gsx-Agreement">
+                    同意
+                    <a href="agreement.html" class="cr" id="login">公积金查询授权协议</a>
+                </label>
+            </div>
+            <div class="gsx-error"></div>
+            <input type="submit" value="授权" disabled="disabled" class="gxs-sub" id="gxs-sub">
+        </form>
+
+        <div class="gxs-Prompt">
+            <p>温馨提示：</p>
+            <div>1.本查询功能只面向已成功申领住房公积金联名卡，且住房公积金账户处于“缴存”和“封存”状态的缴存职工提供。</div>
+            <div>2.未办理联名卡的缴存职工，请尽快办理。</div>
+            <div>3.初次使用查询功能，验证方式必须选择联名卡号，初始密码为个人登记号六位数字（遇X前移一位）。</div>
+            <div>4.如果其它疑问请登录北京市住房公积金网站查询或拨打“12329”咨询。</div>
+        </div>
+    </div>
+    <div id="public-bg" class="public-bg"></div>
+    <div id="public-modal" class="public-modal">
+        <div class="h13013"></div>
+        <span id="textMsg" class="gsx-textMsg"></span>
+    </div>
+    <script type="text/javascript">
+        /**
+         * city对应城市HTML模板
+         **/
+        var TemplateCity = {
+            fCity: function(city) {
+                publicAllocation.IdUrl(Template.a);
+                if(city == 'beijing') {
+                    var TabState = {
+                        initialize: function(index) {
+                            var _self = this;
+                            _self.transition(index);
+                        },
+                        transition: function(state) {
+                            switch(state) {
+                                case 1:
+                                    learn._doSomething(state);
+                                    break;
+                                case 0:
+                                    learn._doSomething2(state);
+                                    break;
+                                default:
+                                    console.log('Invalid State!');
+                                    break;
+                            }
+                        }
+                    };
+                    //业务逻辑
+                    function index() {
+                    }
+                    index.prototype = {
+                        init: function() {
+                            var $this = this;
+                            //验证码
+                            $this.yzm(function(userVal) {
+                                publicAllocation.userID = userVal;
+                                $("#yzm").on("click", function() {
+                                    learn.yzm(function(userVal){
+                                        publicAllocation.userID = userVal;
+                                    });
+                                });
+                            });
+                            //Tab切换
+                            Template.$body.on('click', '#tab a', function() {
+                                Template._self = $(this);
+                                Template.lb = Template._self.attr("data-lb");
+                                Template._gsxError.text("");
+                                Template._gxsSub.removeClass("gsx-subSuc").attr("disabled", true);
+                                Template._index = Template._self.index();
+                                Template.ts = publicAllocation.switchTab(Template._self);
+                                Template.demo = new Tab(Template.ts, Template.options);
+                                Template.demo.start(1000, function(){
+                                    TabState.initialize(Template._index);
+                                }, Template._index, Template._form);
+                            });
+                            //背景关闭Modal
+                            Template.$body.on('click', '#public-bg', function() {
+                                Template._publicBg.hide();
+                                Template._publicModal.fadeOut();
+                            });
+                        },
+                        /*
+                         获取验证码
+                         */
+                        yzm: function(fn, state) {
+                            var userId;
+                            publicAllocation.initAjax(publicAllocation.url + "/bj/getVerifyCode", {"userId": publicAllocation.userID}, function(data) {
+                                if(data.code == 0) {
+                                    if(state == 1) {
+                                        document.getElementById("yzm2").src = "data:image/png;base64,"+data.data;
+                                    } else {
+                                        document.getElementById("yzm").src = "data:image/png;base64,"+data.data;
+                                    }
+                                    userId = data.userId;
+                                    fn(userId);
+                                } else {
+                                    learn.modal(data.message);
+                                }
+                            });
+                        },
+                        /*
+                         确认
+                         */
+                        login: function(list) {
+                            var backJson = JSON.stringify(list);
+                            var _data = JSON.parse(backJson);
+                            publicAllocation.initAjax(publicAllocation.url + "/bj/login", _data, function(data) {
+                                if(data.code == 0) {
+                                    setTimeout(function() {
+                                        learn.ready();
+                                    },1000);
+                                }
+                                $("input[name='authcode']").val("");
+                                $("input[name='loginpwd']").val("");
+                                learn.yzm(function(userVal) {
+                                    publicAllocation.userID = userVal;
+                                },Template._index);
+                                Template._gxsSub.removeClass("gsx-subSuc").attr("disabled", true);
+                                learn.modal(data.message);
+                            });
+                        },
+                        /*
+                         Modal
+                         */
+                        modal: function(mes) {
+                            Template._publicModal.center();
+                            $('#public-bg').show();
+                            Template._publicModal.fadeIn();
+                            Template._textMsg.text(mes);
+                        },
+                        /*
+                         Ready
+                         */
+                        ready: function() {
+                            window.location.href = Template._url;
+                        },
+                        /*
+                         Tab
+                         */
+                        _doSomething: function(state) {
+                            learn.yzm(function(userVal) {
+                                publicAllocation.userID = userVal;
+                            },state);
+                            document.getElementById('yzm2').onclick = function(){
+                                learn.yzm(function(userVal){
+                                    publicAllocation.userID = userVal;
+                                },state);
+                            };
+                            Template._card.children().remove();
+                        },
+                        /*
+                         Tab
+                         */
+                        _doSomething2: function(state) {
+                            learn.yzm(function(userVal) {
+                                publicAllocation.userID = userVal;
+                            },state);
+                            document.getElementById('yzm').onclick = function(){
+                                learn.yzm(function(userVal){
+                                    publicAllocation.userID = userVal;
+                                },state);
+                            };
+                            Template.id.children().remove();
+                        }
+                    };
+                    var learn = new index();
+                    new index().init.prototype = index.prototype;
+                    learn.init();
+                    return learn;
+                } else {
+                    //业务逻辑
+                    function index() {
+                    }
+                    index.prototype = {
+                        init: function() {
+                            var $this = this;
+                            //验证码
+                            $this.yzm(function(userVal) {
+                                publicAllocation.userID = userVal;
+                                $("#yzm2").on("click", function() {
+                                    learn.yzm(function(userVal){
+                                        publicAllocation.userID = userVal;
+                                    });
+                                });
+                            });
+                            Template._card.remove();
+                            Template.id.append('<ul> <li class="gsx-li"> <label class="gsx-label">身份证号</label> <input autocomplete="off" placeholder="请输入身份证号" class="gsx-input wd9" type="text" data-check="required||IdCard" data-msg="身份证号" name="loginname" maxlength="18"> </li> <li class="gsx-li"> <label class="gsx-label">查询密码</label> <input autocomplete="off" placeholder="请输入查询密码" class="gsx-input wd9" type="password" data-check="required" data-msg="查询密码" name="loginpwd" maxlength="20"> </li> <li class="gsx-lih"> <label class="gsx-label">验证码</label> <input autocomplete="off" placeholder="点击图片可刷新" class="gsx-input" type="text" data-check="required||four" data-msg="验证码" maxlength="4" name="authcode"> <img src="" id="yzm2" class="gsx-yzm"> </li> </ul>');
+                            $("#tab").find('a').next().addClass('gsx-tab-on').siblings('a').removeClass('gsx-tab-on').css({
+                                'background-color': '#bbbbbb'
+                            });
+                            //背景关闭Modal
+                            Template.$body.on('click', '#public-bg', function() {
+                                Template._publicBg.hide();
+                                Template._publicModal.fadeOut();
+                            });
+                        },
+                        /*
+                         获取验证码
+                         */
+                        yzm: function(fn) {
+                            publicAllocation.initAjax(publicAllocation.url + "/ty/getVerifyCode", {"userId": publicAllocation.userID}, function(data) {
+                                if(data.code == 0) {
+                                    document.getElementById("yzm2").src = "data:image/png;base64,"+data.data;
+                                    fn(data.userId);
+                                } else {
+                                    learn.modal(data.message);
+                                }
+                            });
+                        },
+                        /*
+                         确认
+                         */
+                        login: function(list) {
+                            var backJson = JSON.stringify(list);
+                            var _data = JSON.parse(backJson);
+                            delete backJson['lb'];
+                            publicAllocation.initAjax(publicAllocation.url + "/ty/login", _data, function(data) {
+                                if(data.code == 0) {
+                                    setTimeout(function() {
+                                        learn.ready();
+                                    },1000);
+                                }
+                                $("input[name='authcode']").val("");
+                                $("input[name='loginpwd']").val("");
+                                learn.yzm(function(userVal) {
+                                    publicAllocation.userID = userVal;
+                                },Template._index);
+                                Template._gxsSub.removeClass("gsx-subSuc").attr("disabled", true);
+                                learn.modal(data.message);
+                            });
+                        },
+                        /*
+                         Modal
+                         */
+                        modal: function(mes) {
+                            Template._publicModal.center();
+                            $('#public-bg').show();
+                            Template._publicModal.fadeIn();
+                            Template._textMsg.text(mes);
+                        },
+                        /*
+                         Ready
+                         */
+                        ready: function() {
+                            window.location.href = Template._url;
+                        }
+                    };
+                    var learn = new index();
+                    new index().init.prototype = index.prototype;
+                    learn.init();
+                    return learn;
+                }
+            }
+        };
+    </script>
+    <script type="text/javascript" src="js/city.js"></script>
+</body>
+</html>
